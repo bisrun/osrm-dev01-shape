@@ -18,6 +18,9 @@ namespace extractor
 namespace intersection
 {
 
+/*
+ *
+ * */
 class CoordinateExtractor
 {
   public:

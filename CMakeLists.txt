@@ -138,6 +138,7 @@ configure_file(
 )
 file(GLOB UtilGlob src/util/*.cpp src/util/*/*.cpp)
 file(GLOB ExtractorGlob src/extractor/*.cpp src/extractor/*/*.cpp)
+file(GLOB Mytest src/mytest/*.cpp src/mytest/*/*.cpp)
 file(GLOB GuidanceGlob src/guidance/*.cpp src/extractor/intersection/*.cpp)
 file(GLOB PartitionerGlob src/partitioner/*.cpp)
 file(GLOB CustomizerGlob src/customize/*.cpp)
@@ -151,6 +152,7 @@ file(GLOB ErrorcodesGlob src/osrm/errorcodes.cpp)
 
 add_library(UTIL OBJECT ${UtilGlob})
 add_library(EXTRACTOR OBJECT ${ExtractorGlob})
+add_library(MYTEST OBJECT ${MytestGlob})
 add_library(GUIDANCE OBJECT ${GuidanceGlob})
 add_library(PARTITIONER OBJECT ${PartitionerGlob})
 add_library(CUSTOMIZER OBJECT ${CustomizerGlob})
@@ -164,6 +166,7 @@ add_library(GEOSHAPE OBJECT ${GeoShapeGlob})
 set_target_properties(UTIL PROPERTIES LINKER_LANGUAGE CXX)
 
 add_executable(osrm-extract src/tools/extract.cpp)
+add_executable(osrm-mytest src/tools/mytest.cpp)
 add_executable(osrm-partition src/tools/partition.cpp)
 add_executable(osrm-customize src/tools/customize.cpp)
 add_executable(osrm-contract src/tools/contract.cpp)
@@ -173,6 +176,7 @@ add_executable(osrm-datastore src/tools/store.cpp $<TARGET_OBJECTS:MICROTAR> $<T
 add_library(osrm src/osrm/osrm.cpp $<TARGET_OBJECTS:ENGINE> $<TARGET_OBJECTS:STORAGE> $<TARGET_OBJECTS:MICROTAR> $<TARGET_OBJECTS:UTIL>)
 add_library(osrm_contract src/osrm/contractor.cpp $<TARGET_OBJECTS:CONTRACTOR> $<TARGET_OBJECTS:UTIL>)
 add_library(osrm_extract src/osrm/extractor.cpp $<TARGET_OBJECTS:EXTRACTOR> $<TARGET_OBJECTS:MICROTAR> $<TARGET_OBJECTS:UTIL> $<TARGET_OBJECTS:GEOSHAPE>)
+add_library(osrm_mytest src/osrm/mytest.cpp $<TARGET_OBJECTS:MYTEST> $<TARGET_OBJECTS:MICROTAR> $<TARGET_OBJECTS:UTIL> $<TARGET_OBJECTS:GEOSHAPE>)
 add_library(osrm_guidance $<TARGET_OBJECTS:GUIDANCE> $<TARGET_OBJECTS:UTIL>)
 add_library(osrm_partition src/osrm/partitioner.cpp $<TARGET_OBJECTS:PARTITIONER> $<TARGET_OBJECTS:MICROTAR> $<TARGET_OBJECTS:UTIL>)
 add_library(osrm_customize src/osrm/customizer.cpp $<TARGET_OBJECTS:CUSTOMIZER> $<TARGET_OBJECTS:MICROTAR> $<TARGET_OBJECTS:UTIL>)
@@ -633,12 +637,25 @@ set(BOOST_ENGINE_LIBRARIES
 # Binaries
 target_link_libraries(osrm-datastore osrm_store ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(osrm-extract osrm_extract ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(osrm-mytest osrm_mytest ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(osrm-partition osrm_partition ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(osrm-customize osrm_customize ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(osrm-contract osrm_contract ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(osrm-routed osrm ${Boost_PROGRAM_OPTIONS_LIBRARY} ${OPTIONAL_SOCKET_LIBS} ${ZLIB_LIBRARY})
 
 set(EXTRACTOR_LIBRARIES
+    ${BZIP2_LIBRARIES}
+    ${Boost_REGEX_LIBRARY}
+    ${BOOST_BASE_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${EXPAT_LIBRARIES}
+    ${USED_LUA_LIBRARIES}
+    ${OSMIUM_LIBRARIES}
+    ${MAYBE_STXXL_LIBRARY}
+    ${TBB_LIBRARIES}
+    ${ZLIB_LIBRARY}
+    ${MAYBE_COVERAGE_LIBRARIES})
+set(MYTEST_LIBRARIES
     ${BZIP2_LIBRARIES}
     ${Boost_REGEX_LIBRARY}
     ${BOOST_BASE_LIBRARIES}
@@ -715,6 +732,7 @@ target_link_libraries(osrm ${ENGINE_LIBRARIES})
 target_link_libraries(osrm_update ${UPDATER_LIBRARIES})
 target_link_libraries(osrm_contract ${CONTRACTOR_LIBRARIES} osrm_update osrm_store)
 target_link_libraries(osrm_extract osrm_guidance ${EXTRACTOR_LIBRARIES} mappers_geoshape)
+target_link_libraries(osrm_mytest osrm_guidance ${MYTEST_LIBRARIES} mappers_geoshape)
 target_link_libraries(osrm_partition ${PARTITIONER_LIBRARIES})
 target_link_libraries(osrm_customize ${CUSTOMIZER_LIBRARIES} osrm_update osrm_store)
 target_link_libraries(osrm_store ${STORAGE_LIBRARIES})
@@ -742,6 +760,7 @@ endif()
 # (i.e., from /usr/local/bin/) the linker can find library dependencies. For
 # more info see http://www.cmake.org/Wiki/CMake_RPATH_handling
 set_property(TARGET osrm-extract PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_property(TARGET osrm-mytest PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 set_property(TARGET osrm-partition PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 set_property(TARGET osrm-contract PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 set_property(TARGET osrm-datastore PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -753,6 +772,7 @@ file(GLOB ParametersGlob include/engine/api/*_parameters.hpp)
 set(EngineHeader include/engine/status.hpp include/engine/engine_config.hpp include/engine/hint.hpp include/engine/bearing.hpp include/engine/approach.hpp include/engine/phantom_node.hpp)
 set(UtilHeader include/util/coordinate.hpp include/util/json_container.hpp include/util/typedefs.hpp include/util/alias.hpp include/util/exception.hpp include/util/bearing.hpp)
 set(ExtractorHeader include/extractor/extractor.hpp include/storage/io_config.hpp include/extractor/extractor_config.hpp include/extractor/travel_mode.hpp)
+set(MytestHeader include/mytest/mytest.hpp include/storage/io_config.hpp include/mytest/mytest_config.hpp)
 set(PartitionerHeader include/partitioner/partitioner.hpp include/partitioner/partitioner_config.hpp)
 set(ContractorHeader include/contractor/contractor.hpp include/contractor/contractor_config.hpp)
 set(StorageHeader include/storage/storage.hpp include/storage/io_config.hpp include/storage/storage_config.hpp)
@@ -760,6 +780,7 @@ install(FILES ${EngineHeader} DESTINATION include/osrm/engine)
 install(FILES ${UtilHeader} DESTINATION include/osrm/util)
 install(FILES ${StorageHeader} DESTINATION include/osrm/storage)
 install(FILES ${ExtractorHeader} DESTINATION include/osrm/extractor)
+install(FILES ${MytestHeader} DESTINATION include/osrm/mytest)
 install(FILES ${PartitionerHeader} DESTINATION include/osrm/partitioner)
 install(FILES ${ContractorHeader} DESTINATION include/osrm/contractor)
 install(FILES ${LibraryGlob} DESTINATION include/osrm)
@@ -767,6 +788,7 @@ install(FILES ${ParametersGlob} DESTINATION include/osrm/engine/api)
 install(FILES ${VariantGlob} DESTINATION include/mapbox)
 install(FILES ${GeoShapeHeader} DESTINATION include/osrm/geoshape)
 install(TARGETS osrm-extract DESTINATION bin)
+install(TARGETS osrm-mytest DESTINATION bin)
 install(TARGETS osrm-partition DESTINATION bin)
 install(TARGETS osrm-customize DESTINATION bin)
 install(TARGETS osrm-contract DESTINATION bin)
@@ -774,6 +796,7 @@ install(TARGETS osrm-datastore DESTINATION bin)
 install(TARGETS osrm-routed DESTINATION bin)
 install(TARGETS osrm DESTINATION lib)
 install(TARGETS osrm_extract DESTINATION lib)
+install(TARGETS osrm_mytest DESTINATION lib)
 install(TARGETS osrm_partition DESTINATION lib)
 install(TARGETS osrm_customize DESTINATION lib)
 install(TARGETS osrm_update DESTINATION lib)

@@ -22,6 +22,7 @@ CompressedEdgeContainer::CompressedEdgeContainer()
     IncreaseFreeList();
 }
 
+// ?
 void CompressedEdgeContainer::IncreaseFreeList()
 {
     m_compressed_oneway_geometries.resize(m_compressed_oneway_geometries.size() + 100);
@@ -32,6 +33,7 @@ void CompressedEdgeContainer::IncreaseFreeList()
     }
 }
 
+// by hsb
 bool CompressedEdgeContainer::HasEntryForID(const EdgeID edge_id) const
 {
     auto iter = m_edge_id_to_list_index_map.find(edge_id);
@@ -353,6 +355,7 @@ void CompressedEdgeContainer::PrintStatistics() const
                 << (float)compressed_geometries / std::max((uint64_t)1, compressed_edges);
 }
 
+// by hsb ?
 const CompressedEdgeContainer::OnewayEdgeBucket &
 CompressedEdgeContainer::GetBucketReference(const EdgeID edge_id) const
 {

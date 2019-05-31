@@ -271,7 +271,8 @@ int Extractor::run(ScriptingEnvironment &scripting_environment)
     files::writeNodes(
         config.GetPath(".osrm.nbg_nodes"), coordinates, node_based_graph_factory.GetOsmNodes());
 
-    CreateNodeShape(coordinates, "/home/mappers/osrm/data/output/node_.shp");
+    // by hsb ++: for debug
+    CreateNodeShape(coordinates, "/home/mappers/git/osrm/data/output/node_.shp");
 
     node_based_graph_factory.ReleaseOsmNodes();
 

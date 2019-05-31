@@ -18,6 +18,7 @@ namespace extractor
 class CompressedEdgeContainer
 {
   public:
+    // by hsb : one way ?
     struct OnewayCompressedEdge
     {
       public:
@@ -26,6 +27,7 @@ class CompressedEdgeContainer
         SegmentDuration duration; // the duration of the edge leading to this node
     };
 
+    // by hsb: using ? instead of typedef
     using OnewayEdgeBucket = std::vector<OnewayCompressedEdge>;
 
     CompressedEdgeContainer();
@@ -77,7 +79,7 @@ class CompressedEdgeContainer
     void IncreaseFreeList();
     std::vector<OnewayEdgeBucket> m_compressed_oneway_geometries;
     std::vector<unsigned> m_free_list;
-    std::unordered_map<EdgeID, unsigned> m_edge_id_to_list_index_map;
+    std::unordered_map<EdgeID, unsigned> m_edge_id_to_list_index_map; // ? by hsb
     std::unordered_map<EdgeID, unsigned> m_forward_edge_id_to_zipped_index_map;
     std::unordered_map<EdgeID, unsigned> m_reverse_edge_id_to_zipped_index_map;
     std::unique_ptr<SegmentDataContainer> segment_data;
