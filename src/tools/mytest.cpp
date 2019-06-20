@@ -2,6 +2,7 @@
 #include "osrm/exception.hpp"
 #include "osrm/mytest.hpp"
 #include "osrm/mytest_config.hpp"
+#include "mytest/mytest.hpp"
 #include "util/log.hpp"
 #include "util/version.hpp"
 
@@ -32,6 +33,7 @@ int main(int argc, char *argv[]) try
     mytester::MytestConfig extractor_config;
     std::string verbosity;
 
+    //util::Log(logINFO) << "argc " <<std::numeric_limits<NodeID>::max();
 
     util::Log(logINFO) << "argc " << argc << "argv" << argv[0];
     util::LogPolicy::GetInstance().SetLevel(verbosity);
@@ -39,7 +41,7 @@ int main(int argc, char *argv[]) try
     util::DumpSTXXLStats();
     util::DumpMemoryStats();
 
-
+    osrm::mytest(extractor_config);
 
     return EXIT_SUCCESS;
 }

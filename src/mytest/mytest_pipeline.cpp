@@ -1,5 +1,5 @@
-#include "mytest/mytest.hpp"
 #include "mytest/mytest_pipeline.hpp"
+
 
 #include "guidance/files.hpp"
 #include "guidance/guidance_processing.hpp"
@@ -20,7 +20,6 @@
 
 // Keep debug include to make sure the debug header is in sync with types.
 #include "util/debug.hpp"
-
 
 
 #include <boost/assert.hpp>
@@ -55,57 +54,48 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+
 using namespace std;
 namespace osrm
 {
 namespace mytester
 {
-
-namespace
+int Pipeline::run_pipeline()
 {
-}
-int Mytest::run()
-{
-    util::LogPolicy::GetInstance().Unmute();
-
-    // Transform the node-based graph that OSM is based on into an edge-based graph
-    // that is better for routing.  Every edge becomes a node, and every valid
-    // movement (e.g. turn from A->B, and B->A) becomes an edge
-    util::Log() << "Generating edge-expanded graph representation";
-
-    TIMER_START(expansion);
-
-
-    util::Log() << "Find segregated edges in node-based graph ..." << std::flush;
-    TIMER_START(segregated);
-
-
-    TIMER_STOP(segregated);
-    util::Log() << "ok, after " << TIMER_SEC(segregated) << "s";
-
-
-    util::Log() << "Writing nodes for nodes-based and edges-based graphs ...";
-
-
-    TIMER_STOP(expansion);
-
-    // output the geometry of the node-based graph, needs to be done after the last usage, since it
-    // destroys internal containers
-
-    util::Log() << "Saving edge-based node weights to file.";
-    TIMER_START(timer_write_node_weights);
-    TIMER_STOP(timer_write_node_weights);
-    util::Log() << "Done writing. (" << TIMER_SEC(timer_write_node_weights) << ")";
-
-    util::Log() << "Computing strictly connected components ...";
-
-    util::Log() << "To prepare the data for routing, run: "
-                << "./osrm-contract " ;
-
-    auto pl = std::make_unique<Pipeline>();
-    pl->run_pipeline();
-   return 0;
+    float a[] = {1,2,3,4,5,6,7,8,9,10};
+    auto c = RootMeanSquare( &a[0],&a[10] );
+    util::Log(logINFO) << "hahaha  " <<c ;
+    return 0;
 }
 
-} // namespace mytester
+float Pipeline::RootMeanSquare( float* first, float* last )
+{
+    float sum=0;
+    if( first > last )
+        util::Log(logINFO) <<"error";
+    tbb::parallel_pipeline( /*max_number_of_live_token=*/16,
+        tbb::make_filter<void,float*>(
+            tbb::filter::serial,
+            [&](tbb::flow_control& fc)-> float*{
+                if( first<last ) {
+                    return first++;
+                 } else {
+                    fc.stop();
+                    return NULL;
+                }
+            }
+        ) &
+        tbb::make_filter<float*,float>(
+            tbb::filter::parallel,
+            [](float* p){return (*p)*(*p);}
+        ) &
+        tbb::make_filter<float,void>(
+            tbb::filter::serial,
+            [&](float x) {sum+=x;}
+        )
+    );
+    return sqrt(sum);
+}
+
+} // namespace mytest
 } // namespace osrm

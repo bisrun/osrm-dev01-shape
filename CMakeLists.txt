@@ -138,7 +138,7 @@ configure_file(
 )
 file(GLOB UtilGlob src/util/*.cpp src/util/*/*.cpp)
 file(GLOB ExtractorGlob src/extractor/*.cpp src/extractor/*/*.cpp)
-file(GLOB Mytest src/mytest/*.cpp src/mytest/*/*.cpp)
+file(GLOB MytestGlob src/mytest/*.cpp  src/mytest/*/*.cpp)
 file(GLOB GuidanceGlob src/guidance/*.cpp src/extractor/intersection/*.cpp)
 file(GLOB PartitionerGlob src/partitioner/*.cpp)
 file(GLOB CustomizerGlob src/customize/*.cpp)
